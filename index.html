@@ -11,10 +11,13 @@
     body { margin:0; min-width:320px; background:#1d280e; color:var(--ink); font-family:Arial,"Microsoft YaHei",sans-serif; }
     button { font:inherit; cursor:pointer; }
     .game { min-height:100svh; max-width:560px; margin:auto; padding:17px 16px 20px; overflow:hidden; background:linear-gradient(#82934b,#42561e 64%,#243011); }
-    header { display:flex; align-items:flex-start; justify-content:space-between; color:#f8e6a8; text-shadow:1px 2px #344216; }
+    header { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; color:#f8e6a8; text-shadow:1px 2px #344216; }
     header p { margin:0 0 3px; font-size:11px; font-weight:800; letter-spacing:.14em; }
     h1 { margin:0; font-family:Georgia,"Songti SC",serif; font-size:44px; line-height:.96; letter-spacing:.24em; }
+    .top-actions { display:flex; align-items:center; gap:7px; }
     header button { border:2px solid #334218; border-radius:4px 11px 4px 9px; padding:8px 12px; color:#354014; background:#efd678; box-shadow:2px 3px #2d3c18; font-size:13px; font-weight:800; }
+    .credit { display:flex; align-items:center; gap:6px; padding:4px 8px 4px 4px; white-space:nowrap; }
+    .credit img { width:26px; height:26px; border:1px solid #4a571e; border-radius:50%; object-fit:cover; }
     .scene { height:min(62svh,600px); min-height:425px; margin-top:14px; position:relative; overflow:hidden; isolation:isolate; border:3px solid #3a4b1c; border-radius:7px 21px 8px 18px; background:#617c31 url("assets/pasture-empty.webp") center/cover no-repeat; box-shadow:inset 0 0 0 6px rgba(246,210,99,.16),4px 7px rgba(16,26,7,.56); }
     .scene::before { content:""; position:absolute; inset:-15%; z-index:0; pointer-events:none; background:radial-gradient(circle at 4% 32%,rgba(255,244,177,.62),rgba(255,244,177,0) 35%); mix-blend-mode:screen; animation:sun-drift 8s ease-in-out infinite alternate; }
     .scene::after { content:""; position:absolute; inset:0; z-index:0; pointer-events:none; background:radial-gradient(ellipse at 36% 36%,rgba(255,240,156,.04) 0 20%,rgba(26,36,11,.06) 52%,rgba(6,11,3,.58) 100%); mix-blend-mode:multiply; }
@@ -70,12 +73,21 @@
     .action.urgent { color:#fff9d9; border-color:#803125; background:#bf4b34; animation:pulse .24s infinite alternate; }
     @keyframes pulse { to { transform:scale(1.024); } }
     .hint { margin:12px 0 0; color:#e7e49e; font-size:12px; text-align:center; text-shadow:1px 1px #26370e; font-weight:700; }
+    .credit-modal { display:none; position:fixed; z-index:20; inset:0; place-items:center; padding:24px; background:rgba(16,24,6,.66); }
+    .credit-modal.open { display:grid; animation:fade-in .16s ease-out; }
+    .credit-card { position:relative; width:min(290px,100%); padding:27px 22px 23px; text-align:center; color:#324014; border:3px solid #475a1b; border-radius:12px 25px 12px 23px; background:#f3df98; box-shadow:7px 9px rgba(12,19,4,.55); }
+    .credit-card img { width:104px; height:104px; margin:0 auto 12px; display:block; border:4px solid #f9edbc; border-radius:50%; object-fit:cover; box-shadow:2px 3px #46571c; }
+    .credit-card p { margin:0 0 4px; color:#a64d31; font-size:12px; font-weight:900; letter-spacing:.2em; }
+    .credit-card h2 { margin:0; font-family:Georgia,"Songti SC",serif; font-size:29px; letter-spacing:.12em; }
+    .credit-card span { display:block; margin-top:8px; font-size:12px; font-weight:800; }
+    .credit-close { position:absolute; top:8px; right:9px; width:29px; height:29px; padding:0; border:0; border-radius:50%; color:#465719; background:#e7c969; box-shadow:none; font-size:22px; line-height:1; }
+    @keyframes fade-in { from { opacity:0; } to { opacity:1; } }
     @media (max-width:370px) { .game { padding-inline:11px; }.scene { min-height:400px; }.mother { width:73%; }.snake { transform:scale(.9); transform-origin:left bottom; } }
   </style>
 </head>
 <body>
   <main class="game">
-    <header><div><p id="round">小牛吃草 · 第 1 次</p><h1>牛 来</h1></div><button id="reset">重来</button></header>
+    <header><div><p id="round">小牛吃草 · 第 1 次</p><h1>牛 来</h1></div><div class="top-actions"><button class="credit" id="credit" aria-haspopup="dialog"><img src="assets/zhaojiayi-avatar.jpg" alt="赵家艺"><span>感谢作者</span></button><button id="reset">重来</button></div></header>
     <section class="scene intro" id="scene" aria-label="小牛吃草游戏画面">
       <div class="turf turf-one"></div><div class="turf turf-two"></div><div class="turf turf-three"></div>
       <div class="calf"><img src="assets/calf-grazing.webp" alt="正在吃草的小牛"></div>
@@ -90,10 +102,17 @@
     <button class="action" id="action">让小牛吃草</button>
     <p class="hint">蛇来得越来越快。别提前喊。</p>
   </main>
+  <div class="credit-modal" id="credit-modal" aria-hidden="true">
+    <section class="credit-card" role="dialog" aria-modal="true" aria-labelledby="credit-title">
+      <button class="credit-close" id="credit-close" aria-label="关闭">×</button>
+      <img src="assets/zhaojiayi-avatar.jpg" alt="赵家艺">
+      <p>感 谢 作 者</p><h2 id="credit-title">赵家艺</h2><span>牛来小游戏 · 创意鸣谢</span>
+    </section>
+  </div>
   <script>
     (function(){
       var phase="intro",score=0,timer=0;
-      var scene=document.getElementById("scene"),msg=document.getElementById("message"),action=document.getElementById("action"),round=document.getElementById("round"),bubble=document.getElementById("bubble"),bubbleName=document.getElementById("bubble-name"),bubbleText=document.getElementById("bubble-text");
+      var scene=document.getElementById("scene"),msg=document.getElementById("message"),action=document.getElementById("action"),round=document.getElementById("round"),bubble=document.getElementById("bubble"),bubbleName=document.getElementById("bubble-name"),bubbleText=document.getElementById("bubble-text"),credit=document.getElementById("credit"),creditModal=document.getElementById("credit-modal"),creditClose=document.getElementById("credit-close");
       function say(text,urgent){msg.className="message"+(urgent?" urgent":"");msg.querySelector("b").textContent=text}
       function draw(){
         scene.className="scene "+phase;round.textContent="小牛吃草 · 第 "+(score+1)+" 次";action.className="action"+(phase==="danger"?" urgent":"");action.textContent=phase==="intro"?"点小牛开始":phase==="danger"?"快喊妈妈！":phase==="lost"?"再来一次":"妈妈赶蛇中…";
@@ -109,6 +128,10 @@
       action.addEventListener("click",function(){if(phase==="intro"){watch()}else if(phase==="danger"){clear();phase="rescue";draw();say("妈妈来了！蛇正在后退。",false);timer=window.setTimeout(function(){score+=1;watch()},760)}else if(phase==="watching"){say("还没有蛇。妈妈说不要乱喊。",false)}else if(phase==="lost"){reset()}});
       scene.addEventListener("click",function(){if(phase!=="watching"&&phase!=="rescue"){action.click()}});
       document.getElementById("reset").addEventListener("click",reset);draw();
+      function toggleCredit(open){creditModal.className="credit-modal"+(open?" open":"");creditModal.setAttribute("aria-hidden",open?"false":"true")}
+      credit.addEventListener("click",function(){toggleCredit(true)});creditClose.addEventListener("click",function(){toggleCredit(false)});
+      creditModal.addEventListener("click",function(event){if(event.target===creditModal){toggleCredit(false)}});
+      document.addEventListener("keydown",function(event){if(event.key==="Escape"){toggleCredit(false)}});
     })();
   </script>
 </body>
